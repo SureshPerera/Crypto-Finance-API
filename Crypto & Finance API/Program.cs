@@ -1,24 +1,22 @@
-﻿var baseAddress = "https://api.coingecko.com/api/v3/coins/";
-var requistUri = "markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false";
+﻿using System.Text.Json;
 
+var baseAddress = "https://api.coinlore.net/api/";
+var requistUri = "tickers/";
+Console.WriteLine("\tCryptocurrency market data..!");
+Console.WriteLine("Waiting for looding...\n");
 IApiDataReader apiDataReader = new ApiDataReader();
 var json = await apiDataReader.Read(baseAddress, requistUri);
 
-Console.ReadLine();
+var root = JsonSerializer.Deserialize<Root>(json);
+var count = 0;
 
-public interface IApiDataReader
+
+foreach (var item in root.data)
 {
-    public Task<string> Read(string baseAddress, string requistUri);
+
+    Console.WriteLine($"{count+1}.curruncy name :{item.name},\nupdate date : {new TimeOnly(root.info.time)},\nprice btc : {item.price_btc},\nprice usd :{item.price_usd},\n% change in 24h  :{item.percent_change_24h}");
+    Console.WriteLine();
+    count++;
 }
-public class ApiDataReader : IApiDataReader
-{
-    public async Task<string> Read(string baseAddress, string requistUri)
-    {
-        using var client = new HttpClient();
-        client.BaseAddress = new Uri(baseAddress);
-        HttpResponseMessage responce = await client.GetAsync(requistUri);
-        responce.EnsureSuccessStatusCode();
-        var json = await responce.Content.ReadAsStringAsync();
-        return json;
-    }
-}
+
+Console.ReadLine();
